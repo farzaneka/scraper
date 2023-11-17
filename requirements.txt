@@ -1,0 +1,10 @@
+feedparser
+lxml
+marshmallow
+nameko
+nameko-sqlalchemy
+psycopg2-binary
+PyJWT
+requests
+SQLAlchemy
+Werkzeug

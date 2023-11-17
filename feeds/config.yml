@@ -1,0 +1,4 @@
+DB_URIS:
+    "authentication:Base": "postgresql+psycopg2://postgres:postgres@localhost:5432/scraper"
+
+AMQP_URI: amqp://${RABBIT_USER:guest}:${RABBIT_PASSWORD:guest}@${RABBIT_HOST:localhost}:${RABBIT_PORT:5672}/

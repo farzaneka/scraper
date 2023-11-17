@@ -1,0 +1,79 @@
+version: "2"
+services:
+  rabbit:
+    container_name: scraper-rabbitmq
+    image: rabbitmq:3.7-management
+    ports:
+        - "15673:15672" # Exposing RabbitMQ web management on different port for convenience
+    restart: always
+
+  postgres:
+    container_name: scarper-postgres
+    image: postgres
+    ports:
+        - "5433:5432" # Exposing Postgres on different port for convenience
+    environment:
+        POSTGRES_DB: "orders"
+        POSTGRES_PASSWORD: "password"
+        POSTGRES_USER: "postgres"
+    restart: always
+
+  authentication:
+    container_name: scraper-authentication
+    image: nameko/scraper-authentication:latest
+    depends_on:
+      - rabbit
+      - postgres
+    ports:
+        - "8001:8000"
+    links:
+        - "rabbit:scraper-authentication-rabbitmq"
+        - "postgres:scraper-authentication-postgres"
+    environment:
+        DB_PASSWORD: "password"
+        DB_USER: "postgres"
+        DB_HOST: "postgres"
+        DB_NAME: "member"
+        RABBIT_PASSWORD: "guest"
+        RABBIT_USER: "guest"
+        RABBIT_HOST: "rabbit"
+        RABBIT_PORT: "5672"
+        RABBIT_MANAGEMENT_PORT: "15672"
+
+  feeds:
+    container_name: scraper-feeds
+    image: nameko/scraper-feeds:latest
+    depends_on:
+      - rabbit
+      - postgres
+    ports:
+      - "8001:8000"
+    links:
+      - "rabbit:scraper-feeds-rabbitmq"
+      - "postgres:scraper-feeds-postgres"
+    environment:
+      DB_PASSWORD: "password"
+      DB_USER: "postgres"
+      DB_HOST: "postgres"
+      DB_NAME: "feed"
+      RABBIT_PASSWORD: "guest"
+      RABBIT_USER: "guest"
+      RABBIT_HOST: "rabbit"
+      RABBIT_PORT: "5672"
+      RABBIT_MANAGEMENT_PORT: "15672"
+
+  gateway:
+    container_name: scraper-gateway
+    image: nameko/scraper-gateway:latest
+    depends_on:
+      - rabbit
+    ports:
+        - "8003:8000"
+    links:
+        - "rabbit:scraper-rabbitmq"
+    environment:
+        RABBIT_PASSWORD: "guest"
+        RABBIT_USER: "guest"
+        RABBIT_HOST: "rabbit"
+        RABBIT_PORT: "5672"
+        RABBIT_MANAGEMENT_PORT: "15672"
